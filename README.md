@@ -4,9 +4,7 @@ Passport Application Smart Contract
 Overview 
 ---------
 
-The Passport Application Smart Contract expresses a workflow for applying/renewing  of passport 
-that suppports online payment. The state transition diagram below shows the
-interactions among the states in this workflow. 
+The Passport Application Smart Contract expresses a workflow for applying/renewing of passport that suppports online payment. The state transition diagram below shows the interactions among the states in this workflow. 
 
 Application Roles 
 ------------------
@@ -43,9 +41,9 @@ The state changes to <b>PersonalAppearance</b> when the applicant paid the appli
 
 The applicant have a chance to cancel his/her appointment when the current state is <b>MakeAppointment</b> or <b>PersonalAppearance</b> but there is a penalty of <b>8 CRS</b>. After cancelling an appointment,  the applicant will only receive <b>72 CRS</b>, the provider will receive the <b>8 CRS</b> and the state will be set to <b>CancelledApplication</b> state.
 
-When the current state is in <b>PersonalAppearance</b>, the provider/passport government agency could approve the applicant's application. If the provider approves the application, the smart contract will transfer the payment (80 CRS) to provider's address and the state will set to <b>ApprovedApplication</b> state and the process completed.
+When the current state is in <b>PersonalAppearance</b>, the provider/passport government agency could approve the applicant's application. If the provider approves the application, the smart contract will transfer the payment (80 CRS) to provider's address. The state will set to <b>ApprovedApplication</b> state and the process is completed.
 
-When the current state is in <b>PersonalAppearance</b>, the provider/passport government agency could reject the applicant's application. If the provider rejects the application, the smart contract will transfer 8 CRS as processing fee to provider's address and 72 CRS to applicant's the state will set to <b>RejectedApplication</b> state and the process completed.
+Also, when the current state is in <b>PersonalAppearance</b>, the provider/passport government agency could reject the applicant's application. If the provider rejects the application, the smart contract will transfer 8 CRS as processing fee to provider's address and 72 CRS to applicant's address. The state will set to <b>RejectedApplication</b> state and the process is completed.
 
 Application Files
 -----------------
