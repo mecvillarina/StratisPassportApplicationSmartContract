@@ -5,7 +5,7 @@ Overview
 ---------
 
 The Passport Application Smart Contract expresses a workflow for applying/renewing  of passport 
-that has online payment option. The state transition diagram below shows the
+that suppports online payment. The state transition diagram below shows the
 interactions among the states in this workflow. 
 
 Application Roles 
@@ -13,8 +13,8 @@ Application Roles
 
 | Name                   | Description                                       |
 |------------------------|---------------------------------------------------|
-| Provider 				 | A government organization that responsible for issuance of passport |
-| Applicant    			 | The individual whom needs to have a passport |
+| Provider 				 | A government organization that responsible for issuance of the passport |
+| Applicant    			 | The individual whom needs a passport |
 
 
 States 
@@ -22,9 +22,9 @@ States
 
 | Name                   | Description                                       |
 |------------------------|---------------------------------------------------|
-|MakeAppointment 		 | Indicates that the applicant make an appointment for passport application/renewal |
+|MakeAppointment 		 | Indicates that the applicant did make an appointment for passport application/renewal |
 |PersonalAppearance 	 | Indicates that the applicant should visit the passport agency office for personal appearance.|
-|CancelledApplication 	 | Indicates that the applicant cancelled his/her application.|
+|CancelledApplication 	 | Indicates that the applicant have cancelled his/her application.|
 |ApprovedApplication 	 | Indicates that the applicant passport application has been approved by the provider |
 |RejectedApplication 	 | Indicates that the applicant passport application has been rejected by the provider |
 
@@ -40,7 +40,7 @@ An instance of the Passport Application Smart Contract's workflow starts in the:
 <b>MakeAppointment</b> state when an applicant successfully select a appointment schedule 
 and filled up an online application form. 
 
-The state changes to <b>PersonalAppearance<b> when the applicant paid the application fee. 
+The state changes to <b>PersonalAppearance</b> when the applicant paid the application fee. 
 The application fee is currently set to <b>80 CRS</b>. The smart contract will hold the payment 
 until the state set to either <b>PersonalAppearance</b>
 
@@ -49,7 +49,7 @@ or <b>PersonalAppearance<b> but there is a penalty of <b>8 CRS</b>. After cancel
 the applicant will only receive <b>72 CRS</b>, the provider will receive the <b>8 CRS</b> and 
 the state will be set to <b>CancelledApplication</b>
 
-When the state is in <b>PersonalAppearance<b>, the provider/passport government agency could approve an appointment. 
+When the state is in <b>PersonalAppearance</b>, the provider/passport government agency could approve an appointment. 
 If the provider approves the application, the payment will transfer to the provider address and the state 
 will set to <b>ApprovedApplication</b>.
 
@@ -73,8 +73,4 @@ responsibility to a counterparty once and then completing the workflow.
 
 Application Files
 -----------------
-[BasicProvenance.cs](./BasicProvenanceContract/BasicProvenance.cs)
-
-References
------------------
-[Azure Workbench Basic Provenance Example](https://github.com/Azure-Samples/blockchain/tree/master/blockchain-workbench/application-and-smart-contract-samples/basic-provenance)
+[PassportApplication.cs](./PassportApplicationContract/PassportApplication.cs)
