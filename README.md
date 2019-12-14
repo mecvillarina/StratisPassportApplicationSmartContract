@@ -44,8 +44,8 @@ The state changes to <b>PersonalAppearance</b> when the applicant paid the appli
 The application fee is currently set to <b>80 CRS</b>. The smart contract will hold the payment 
 until the state set to either <b>PersonalAppearance</b>
 
-The applicant have a chance to cancel his/her appointment when the state is <b>MakeAppointment<b> 
-or <b>PersonalAppearance<b> but there is a penalty of <b>8 CRS</b>. After cancelling an appointment, 
+The applicant have a chance to cancel his/her appointment when the state is <b>MakeAppointment</b> 
+or <b>PersonalAppearance</b> but there is a penalty of <b>8 CRS</b>. After cancelling an appointment, 
 the applicant will only receive <b>72 CRS</b>, the provider will receive the <b>8 CRS</b> and 
 the state will be set to <b>CancelledApplication</b>
 
