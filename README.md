@@ -37,14 +37,11 @@ Workflow Details
 
 An instance of the Passport Application Smart Contract's workflow starts in the:
 
-<b>MakeAppointment</b> state when an applicant successfully select a appointment schedule 
-and filled up an online application form. 
+<b>MakeAppointment</b> state when an applicant successfully select an appointment schedule and filled up an online application form. 
 
-The state changes to <b>PersonalAppearance</b> when the applicant paid the application fee. 
-The application fee is currently set to <b>80 CRS</b>. The smart contract will hold the payment 
-until the state set to either <b>PersonalAppearance</b>
+The state changes to <b>PersonalAppearance</b> when the applicant paid the application fee. The application fee is currently set to <b>80 CRS</b>. The smart contract will hold the payment until the state set either to <b>ApprovedApplication</b>, <b>RejectedApplication</b>, or <b>CancelledApplication</b>.
 
-The applicant have a chance to cancel his/her appointment when the state is <b>MakeAppointment</b> 
+The applicant have a chance to cancel his/her appointment when the cuurent state is <b>MakeAppointment</b> 
 or <b>PersonalAppearance</b> but there is a penalty of <b>8 CRS</b>. After cancelling an appointment, 
 the applicant will only receive <b>72 CRS</b>, the provider will receive the <b>8 CRS</b> and 
 the state will be set to <b>CancelledApplication</b>
