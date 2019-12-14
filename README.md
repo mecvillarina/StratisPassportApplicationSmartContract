@@ -53,7 +53,7 @@ When the state is in <b>PersonalAppearance</b>, the provider/passport government
 If the provider approves the application, the payment will transfer to the provider address and the state 
 will set to <b>ApprovedApplication</b>.
 
-When the state is in <b>PersonalAppearance<b>, the provider/passport government agency could reject an appointment. 
+When the state is in <b>PersonalAppearance</b>, the provider/passport government agency could reject an appointment. 
 If the provider rejects the application, the provider will receive <b>8 CRS</b> as an appointment fee and the applicant will only receive <b>72 CRS</b>,
  the payment will transfer to the provider address and the state will set to <b>ApprovedApplication</b>.
 
