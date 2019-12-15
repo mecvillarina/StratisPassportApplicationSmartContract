@@ -83,10 +83,10 @@ public class PassportApplication : SmartContract
         Assert(this.State == (uint)StateType.MakeAppointment);
         Assert(this.Message.Sender == Applicant);
 
-        if(Balance < _passportApplicationCostInSats)
+        if(CurrentBalance < _passportApplicationCostInSats)
         {
-            Transfer(Applicant, Balance);
-            Assert(Balance >= _passportApplicationCostInSats, "Not enough funds.");
+            Transfer(Applicant, CurrentBalance);
+            Assert(CurrentBalance >= _passportApplicationCostInSats, "Not enough funds.");
         }
 
         State = (uint)StateType.PersonalAppearance;
@@ -99,7 +99,7 @@ public class PassportApplication : SmartContract
 
         if (this.State == (uint)StateType.PersonalAppearance)
         {
-            var newBalanceAfterPenalty = Balance - _passportApplicationPenaltyInSats;
+            var newBalanceAfterPenalty = CurrentBalance - _passportApplicationPenaltyInSats;
             Transfer(Applicant, newBalanceAfterPenalty);
             Transfer(Provider, _passportApplicationPenaltyInSats);
         }
@@ -114,7 +114,7 @@ public class PassportApplication : SmartContract
 
         if (this.State == (uint)StateType.PersonalAppearance)
         {
-            var newBalanceAfterPenalty = Balance - _passportApplicationPenaltyInSats;
+            var newBalanceAfterPenalty = CurrentBalance - _passportApplicationPenaltyInSats;
             Transfer(Applicant, newBalanceAfterPenalty);
             Transfer(Provider, _passportApplicationPenaltyInSats);
         }
@@ -127,7 +127,7 @@ public class PassportApplication : SmartContract
         Assert(this.State == (uint)StateType.PersonalAppearance);
         Assert(this.Message.Sender == Provider);
 
-        Transfer(Provider, Balance);
+        Transfer(Provider, CurrentBalance);
 
         State = (uint)StateType.ApprovedApplication;
     }

@@ -62,154 +62,262 @@ namespace PassportApplicationContract.Tests
         }
 
         [Fact]
-        public void Pay_Fails_Sender_Not_Applicant()
+        public void Pay_Fails_WhenSenderIsNotApplicant()
         {
             // Setup incorrect sender.
+            this.mockPersistentState.Setup(s => s.GetAddress(nameof(PassportApplication.Applicant))).Returns(ApplicantAddress);
             this.mockContractState.Setup(s => s.Message.Sender).Returns(Address.Zero);
 
             var contract = new PassportApplication(this.mockContractState.Object, AppId, ProviderAddress, RefNumber);
-            
+
             // Setup set state.
             this.mockPersistentState.Setup(s => s.GetUInt32(nameof(PassportApplication.State))).Returns((uint)PassportApplication.StateType.MakeAppointment);
 
             // Attempt pay of wrong applicant should fail.
-            Assert.Throws<SmartContractAssertException>(contract.Pay);
+            Assert.Throws<SmartContractAssertException>(() => contract.Pay());
         }
 
-        //[Fact]
-        //public void TransferResponsibility_Fails_State_Is_Completed()
-        //{
-        //    var contract = this.NewPassportApplication();
+        [Theory]
+        [InlineData((uint)PassportApplication.StateType.ApprovedApplication)]
+        [InlineData((uint)PassportApplication.StateType.RejectedApplication)]
+        [InlineData((uint)PassportApplication.StateType.CancelledApplication)]
+        [InlineData((uint)PassportApplication.StateType.PersonalAppearance)]
+        public void Pay_Fails_WhenStateIsNotMakeAppointment(uint state)
+        {
+            // Setup correct applicant
+            this.mockPersistentState.Setup(s => s.GetAddress(nameof(PassportApplication.Applicant))).Returns(ApplicantAddress);
+            this.mockContractState.Setup(s => s.Message.Sender).Returns(ApplicantAddress);
 
-        //    // Setup correct sender.
-        //    this.mockContractState.Setup(s => s.Message.Sender).Returns(CounterPartyAddress);
+            var contract = new PassportApplication(this.mockContractState.Object, AppId, ProviderAddress, RefNumber);
 
-        //    // Setup counterparty address.
-        //    this.mockPersistentState.Setup(s => s.GetAddress(nameof(PassportApplication.CounterParty))).Returns(CounterPartyAddress);
+            // Setup wrong state.
+            this.mockPersistentState.Setup(s => s.GetUInt32(nameof(PassportApplication.State))).Returns(state);
 
-        //    // Setup state = completed.
-        //    this.mockPersistentState.Setup(s => s.GetUInt32(nameof(PassportApplication.State))).Returns((uint)PassportApplication.StateType.Completed);
+            // Attempt pay when state is not set to MakeAppointment should fail.
+            Assert.Throws<SmartContractAssertException>(() => contract.Pay());
+        }
 
-        //    // Attempt to transfer to any address should fail.
-        //    Assert.Throws<SmartContractAssertException>(() => contract.TransferResponsibility(Address.Zero));
-        //}
+        [Fact]
+        public void Pay_Fails_WhenBalanceIsNotEnough()
+        {
+            // Setup incorrect sender.
+            this.mockPersistentState.Setup(s => s.GetAddress(nameof(PassportApplication.Applicant))).Returns(ApplicantAddress);
+            this.mockContractState.Setup(s => s.Message.Sender).Returns(ApplicantAddress);
 
-        //[Fact]
-        //public void TransferResponsibility_Succeeds_State_Is_Created()
-        //{
-        //    var contract = this.NewPassportApplication();
+            var contract = new PassportApplication(this.mockContractState.Object, AppId, ProviderAddress, RefNumber);
 
-        //    // Setup correct sender.
-        //    this.mockContractState.Setup(s => s.Message.Sender).Returns(CounterPartyAddress);
+            // Setup set state.
+            this.mockPersistentState.Setup(s => s.GetUInt32(nameof(PassportApplication.State))).Returns((uint)PassportApplication.StateType.MakeAppointment);
 
-        //    // Setup counterparty address.
-        //    this.mockPersistentState.Setup(s => s.GetAddress(nameof(PassportApplication.CounterParty))).Returns(CounterPartyAddress);
+            // Setup insufficient balance
+            this.mockPersistentState.Setup(s => s.GetUInt64(nameof(PassportApplication.Balance))).Returns(7000000000);
 
-        //    // Setup state = created.
-        //    this.mockPersistentState.Setup(s => s.GetUInt32(nameof(PassportApplication.State))).Returns((uint)PassportApplication.StateType.Created);
+            // Attempt pay of insufficient balance should fail.
+            Assert.Throws<SmartContractAssertException>(() => contract.Pay());
+        }
 
-        //    // Attempt to transfer to any address should succeed.
-        //    contract.TransferResponsibility(IntermediaryAddress);
+        [Fact]
+        public void Pay_Succeeds_WhenBalanceIsEnough()
+        {
+            // Setup incorrect sender.
+            this.mockPersistentState.Setup(s => s.GetAddress(nameof(PassportApplication.Applicant))).Returns(ApplicantAddress);
+            this.mockContractState.Setup(s => s.Message.Sender).Returns(ApplicantAddress);
 
-        //    this.mockPersistentState.Verify(s => s.SetUInt32(nameof(PassportApplication.State), (uint)PassportApplication.StateType.InTransit), Times.Once);
-        //    this.mockPersistentState.Verify(s => s.SetAddress(nameof(PassportApplication.PreviousCounterParty), CounterPartyAddress), Times.Once);
-        //    this.mockPersistentState.Verify(s => s.SetAddress(nameof(PassportApplication.CounterParty), IntermediaryAddress), Times.Once);
-        //}
+            var contract = new PassportApplication(this.mockContractState.Object, AppId, ProviderAddress, RefNumber);
 
-        //[Fact]
-        //public void TransferResponsibility_Succeeds_State_Is_InTransit()
-        //{
-        //    var contract = this.NewPassportApplication();
+            // Setup set state.
+            this.mockPersistentState.Setup(s => s.GetUInt32(nameof(PassportApplication.State))).Returns((uint)PassportApplication.StateType.MakeAppointment);
 
-        //    // Setup correct sender.
-        //    this.mockContractState.Setup(s => s.Message.Sender).Returns(CounterPartyAddress);
+            // Setup sufficient balance
+            this.mockPersistentState.Setup(s => s.GetUInt64(nameof(PassportApplication.Balance))).Returns(8000000000);
 
-        //    // Setup counterparty address.
-        //    this.mockPersistentState.Setup(s => s.GetAddress(nameof(PassportApplication.CounterParty))).Returns(CounterPartyAddress);
+            contract.Pay();
 
-        //    // Setup state = in transit.
-        //    this.mockPersistentState.Setup(s => s.GetUInt32(nameof(PassportApplication.State))).Returns((uint)PassportApplication.StateType.InTransit);
+            // Attempt pay of with sufficient balance should succeed.
+            this.mockPersistentState.Verify(s => s.SetUInt32(nameof(PassportApplication.State), (uint)PassportApplication.StateType.PersonalAppearance));
+        }
 
-        //    // Attempt to transfer to any address should succeed.
-        //    contract.TransferResponsibility(IntermediaryAddress);
+        [Fact]
+        public void CancelApplication_Fails_WhenSenderIsNotApplicant()
+        {
+            // Setup incorrect sender.
+            this.mockPersistentState.Setup(s => s.GetAddress(nameof(PassportApplication.Applicant))).Returns(ApplicantAddress);
+            this.mockContractState.Setup(s => s.Message.Sender).Returns(Address.Zero);
 
-        //    // Make sure the state is not changed.
-        //    this.mockPersistentState.Verify(s => s.SetUInt32(nameof(PassportApplication.State), It.IsAny<uint>()), Times.Never);
+            var contract = new PassportApplication(this.mockContractState.Object, AppId, ProviderAddress, RefNumber);
 
-        //    this.mockPersistentState.Verify(s => s.SetAddress(nameof(PassportApplication.PreviousCounterParty), CounterPartyAddress), Times.Once);
-        //    this.mockPersistentState.Verify(s => s.SetAddress(nameof(PassportApplication.CounterParty), IntermediaryAddress), Times.Once);
-        //}
+            // Setup set state.
+            this.mockPersistentState.Setup(s => s.GetUInt32(nameof(PassportApplication.State))).Returns((uint)PassportApplication.StateType.MakeAppointment);
 
-        //[Fact]
-        //public void Complete_Fails_Sender_Not_SupplyChainOwner()
-        //{
-        //    var contract = this.NewPassportApplication();
+            // Attempt CancelApplication when sender is not applicant should fail.
+            Assert.Throws<SmartContractAssertException>(() => contract.CancelApplication());
+        }
 
-        //    // Setup incorrect sender.
-        //    this.mockContractState.Setup(s => s.Message.Sender).Returns(Address.Zero);
+        [Theory]
+        [InlineData((uint)PassportApplication.StateType.ApprovedApplication)]
+        [InlineData((uint)PassportApplication.StateType.RejectedApplication)]
+        [InlineData((uint)PassportApplication.StateType.CancelledApplication)]
+        public void CancelApplication_Fails_WhenStateIsNotMakeAppointmentOrIsNotPersonalAppearance(uint state)
+        {
+            // Setup incorrect sender.
+            this.mockPersistentState.Setup(s => s.GetAddress(nameof(PassportApplication.Applicant))).Returns(ApplicantAddress);
+            this.mockContractState.Setup(s => s.Message.Sender).Returns(ApplicantAddress);
 
-        //    // Setup supplychainowner address.
-        //    this.mockPersistentState.Setup(s => s.GetAddress(nameof(PassportApplication.SupplyChainOwner))).Returns(SupplyChainOwnerAddress);
+            var contract = new PassportApplication(this.mockContractState.Object, AppId, ProviderAddress, RefNumber);
 
-        //    // Attempt to call completion with incorrect sender should fail.
-        //    Assert.Throws<SmartContractAssertException>(() => contract.Complete());
-        //}
+            // Setup set state.
+            this.mockPersistentState.Setup(s => s.GetUInt32(nameof(PassportApplication.State))).Returns(state);
 
-        //[Fact]
-        //public void Complete_Fails_State_Is_Completed()
-        //{
-        //    var contract = this.NewPassportApplication();
+            // Attempt CancelApplication when state is not MakeAppointment or PersonalAppearance should fail.
+            Assert.Throws<SmartContractAssertException>(() => contract.CancelApplication());
+        }
 
-        //    // Setup correct sender.
-        //    this.mockContractState.Setup(s => s.Message.Sender).Returns(SupplyChainOwnerAddress);
+        [Fact]
+        public void CancelApplication_Succeeds_WhenStateIsMakeAppointment()
+        {
+            // Setup incorrect sender.
+            this.mockPersistentState.Setup(s => s.GetAddress(nameof(PassportApplication.Applicant))).Returns(ApplicantAddress);
+            this.mockContractState.Setup(s => s.Message.Sender).Returns(ApplicantAddress);
 
-        //    // Setup correct supplychainowner address.
-        //    this.mockPersistentState.Setup(s => s.GetAddress(nameof(PassportApplication.SupplyChainOwner))).Returns(SupplyChainOwnerAddress);
+            var contract = new PassportApplication(this.mockContractState.Object, AppId, ProviderAddress, RefNumber);
 
-        //    // Setup state = completed.
-        //    this.mockPersistentState.Setup(s => s.GetUInt32(nameof(PassportApplication.State))).Returns((uint)PassportApplication.StateType.Completed);
+            // Setup set state.
+            this.mockPersistentState.Setup(s => s.GetUInt32(nameof(PassportApplication.State))).Returns((uint)PassportApplication.StateType.MakeAppointment);
 
-        //    // Attempt to call completion with incorrect state should fail.
-        //    Assert.Throws<SmartContractAssertException>(() => contract.Complete());
-        //}
+            contract.CancelApplication();
 
-        //[Theory]
-        //[InlineData((uint)PassportApplication.StateType.InTransit)]
-        //[InlineData((uint)PassportApplication.StateType.Created)]
-        //public void Complete_Succeeds(uint state)
-        //{
-        //    var contract = this.NewPassportApplication();
+            // Attempt CancelApplication when state is MakeAppointment should succeed.
+            this.mockPersistentState.Verify(s => s.SetUInt32(nameof(PassportApplication.State), (uint)PassportApplication.StateType.CancelledApplication));
+        }
 
-        //    // Setup correct sender.
-        //    this.mockContractState.Setup(s => s.Message.Sender).Returns(SupplyChainOwnerAddress);
+        [Fact]
+        public void CancelApplication_Succeeds_WhenStateIsPersonalAppearance()
+        {
+            // Setup incorrect sender.
+            this.mockPersistentState.Setup(s => s.GetAddress(nameof(PassportApplication.Applicant))).Returns(ApplicantAddress);
+            this.mockContractState.Setup(s => s.Message.Sender).Returns(ApplicantAddress);
 
-        //    // Setup correct supplychainowner address.
-        //    this.mockPersistentState.Setup(s => s.GetAddress(nameof(PassportApplication.SupplyChainOwner))).Returns(SupplyChainOwnerAddress);
+            var contract = new PassportApplication(this.mockContractState.Object, AppId, ProviderAddress, RefNumber);
 
-        //    // Setup correct counterparty address.
-        //    this.mockPersistentState.Setup(s => s.GetAddress(nameof(PassportApplication.CounterParty))).Returns(CounterPartyAddress);
+            // Setup Persistance States
+            this.mockPersistentState.Setup(s => s.GetUInt32(nameof(PassportApplication.State))).Returns((uint)PassportApplication.StateType.PersonalAppearance);
+            this.mockPersistentState.Setup(s => s.GetUInt64(nameof(PassportApplication.Balance))).Returns(8000000000);
 
-        //    // Setup current state.
-        //    this.mockPersistentState.Setup(s => s.GetUInt32(nameof(PassportApplication.State))).Returns(state);
+            contract.CancelApplication();
 
-        //    // Attempt to call completion with incorrect state should fail.
-        //    contract.Complete();
+            // Attempt CancelApplication when state is PersonalAppearance should succeed.
+            this.mockPersistentState.Verify(s => s.SetUInt32(nameof(PassportApplication.State), (uint)PassportApplication.StateType.CancelledApplication));
+        }
 
-        //    this.mockPersistentState.Verify(s => s.SetUInt32(nameof(PassportApplication.State), (uint)PassportApplication.StateType.Completed));
-        //    this.mockPersistentState.Verify(s => s.SetAddress(nameof(PassportApplication.PreviousCounterParty), CounterPartyAddress));
-        //    this.mockPersistentState.Verify(s => s.SetAddress(nameof(PassportApplication.CounterParty), Address.Zero));
-        //}
+        [Fact]
+        public void ApproveApplication_Fails_WhenSenderIsNotProvider()
+        {
+            // Setup incorrect sender.
+            this.mockPersistentState.Setup(s => s.GetAddress(nameof(PassportApplication.Provider))).Returns(ProviderAddress);
+            this.mockContractState.Setup(s => s.Message.Sender).Returns(Address.Zero);
 
-        //private PassportApplication NewPassportApplication()
-        //{
-        //    this.mockContractState.Setup(s => s.Message.Sender).Returns(InitiatingCounterPartyAddress);
+            var contract = new PassportApplication(this.mockContractState.Object, AppId, ProviderAddress, RefNumber);
 
-        //    var result = new PassportApplication(this.mockContractState.Object, SupplyChainOwnerAddress, SupplyChainObserverAddress);
+            // Setup set state.
+            this.mockPersistentState.Setup(s => s.GetUInt32(nameof(PassportApplication.State))).Returns((uint)PassportApplication.StateType.PersonalAppearance);
 
-        //    // Reset the invocations that happened in the constructor so we don't accidentally test them.
-        //    this.mockPersistentState.Invocations.Clear();
+            // Attempt ApproveApplication when sender is not the provider should fail.
+            Assert.Throws<SmartContractAssertException>(() => contract.ApproveApplication());
+        }
 
-        //    return result;
-        //}
+        [Theory]
+        [InlineData((uint)PassportApplication.StateType.MakeAppointment)]
+        [InlineData((uint)PassportApplication.StateType.ApprovedApplication)]
+        [InlineData((uint)PassportApplication.StateType.RejectedApplication)]
+        [InlineData((uint)PassportApplication.StateType.CancelledApplication)]
+        public void ApproveApplication_Fails_WhenStateIsNotPersonalAppearance(uint state)
+        {
+            // Setup incorrect sender.
+            this.mockPersistentState.Setup(s => s.GetAddress(nameof(PassportApplication.Applicant))).Returns(ApplicantAddress);
+            this.mockContractState.Setup(s => s.Message.Sender).Returns(ApplicantAddress);
+
+            var contract = new PassportApplication(this.mockContractState.Object, AppId, ProviderAddress, RefNumber);
+
+            // Setup set state.
+            this.mockPersistentState.Setup(s => s.GetUInt32(nameof(PassportApplication.State))).Returns(state);
+
+            // Attempt ApproveApplication when state is not PersonalAppearance should fail.
+            Assert.Throws<SmartContractAssertException>(() => contract.ApproveApplication());
+        }
+
+        [Fact]
+        public void ApproveApplication_Succeeds_WhenSenderIsProviderAndStateIsPersonalAppearance()
+        {
+            // Setup incorrect sender.
+            this.mockPersistentState.Setup(s => s.GetAddress(nameof(PassportApplication.Provider))).Returns(ProviderAddress);
+            this.mockContractState.Setup(s => s.Message.Sender).Returns(ProviderAddress);
+
+            var contract = new PassportApplication(this.mockContractState.Object, AppId, ProviderAddress, RefNumber);
+
+            // Setup set state.
+            this.mockPersistentState.Setup(s => s.GetUInt32(nameof(PassportApplication.State))).Returns((uint)PassportApplication.StateType.PersonalAppearance);
+
+            // Attempt ApproveApplication when sender is the provider and the state is PersonalAppearance should succeed.
+
+            contract.ApproveApplication();
+
+            this.mockPersistentState.Verify(s => s.SetUInt32(nameof(PassportApplication.State), (uint)PassportApplication.StateType.ApprovedApplication));
+        }
+
+        [Fact]
+        public void RejectApplication_Fails_WhenSenderIsNotProvider()
+        {
+            // Setup incorrect sender.
+            this.mockPersistentState.Setup(s => s.GetAddress(nameof(PassportApplication.Provider))).Returns(ProviderAddress);
+            this.mockContractState.Setup(s => s.Message.Sender).Returns(Address.Zero);
+
+            var contract = new PassportApplication(this.mockContractState.Object, AppId, ProviderAddress, RefNumber);
+
+            // Setup set state.
+            this.mockPersistentState.Setup(s => s.GetUInt32(nameof(PassportApplication.State))).Returns((uint)PassportApplication.StateType.PersonalAppearance);
+
+            // Attempt RejectApplication when sender is not the provider should fail.
+            Assert.Throws<SmartContractAssertException>(() => contract.RejectApplication());
+        }
+
+        [Theory]
+        [InlineData((uint)PassportApplication.StateType.MakeAppointment)]
+        [InlineData((uint)PassportApplication.StateType.ApprovedApplication)]
+        [InlineData((uint)PassportApplication.StateType.RejectedApplication)]
+        [InlineData((uint)PassportApplication.StateType.CancelledApplication)]
+        public void RejectApplication_Fails_WhenStateIsNotPersonalAppearance(uint state)
+        {
+            // Setup incorrect sender.
+            this.mockPersistentState.Setup(s => s.GetAddress(nameof(PassportApplication.Applicant))).Returns(ApplicantAddress);
+            this.mockContractState.Setup(s => s.Message.Sender).Returns(ApplicantAddress);
+
+            var contract = new PassportApplication(this.mockContractState.Object, AppId, ProviderAddress, RefNumber);
+
+            // Setup set state.
+            this.mockPersistentState.Setup(s => s.GetUInt32(nameof(PassportApplication.State))).Returns(state);
+
+            // Attempt RejectApplication when state is not PersonalAppearance should fail.
+            Assert.Throws<SmartContractAssertException>(() => contract.RejectApplication());
+        }
+
+        [Fact]
+        public void RejectApplication_Succeeds_WhenSenderIsProviderAndStateIsPersonalAppearance()
+        {
+            // Setup incorrect sender.
+            this.mockPersistentState.Setup(s => s.GetAddress(nameof(PassportApplication.Provider))).Returns(ProviderAddress);
+            this.mockContractState.Setup(s => s.Message.Sender).Returns(ProviderAddress);
+
+            var contract = new PassportApplication(this.mockContractState.Object, AppId, ProviderAddress, RefNumber);
+
+            // Setup set state.
+            this.mockPersistentState.Setup(s => s.GetUInt32(nameof(PassportApplication.State))).Returns((uint)PassportApplication.StateType.PersonalAppearance);
+
+            // Attempt RejectApplication when sender is the provider and the state is PersonalAppearance should succeed.
+
+            contract.RejectApplication();
+
+            this.mockPersistentState.Verify(s => s.SetUInt32(nameof(PassportApplication.State), (uint)PassportApplication.StateType.RejectedApplication));
+        }
+
     }
 }
