@@ -48,3 +48,4 @@ Also, when the current state is in <b>PersonalAppearance</b>, the provider/passp
 Application Files
 -----------------
 [PassportApplication.cs](./PassportApplicationContract/PassportApplication.cs)
+[PassportApplicationTests.cs](./PassportApplicationContract.Tests/PassportApplicationTests.cs)
