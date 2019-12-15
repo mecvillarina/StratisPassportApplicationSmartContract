@@ -47,6 +47,5 @@ Also, when the current state is in <b>PersonalAppearance</b>, the provider/passp
 
 Application Files
 -----------------
-[PassportApplication.cs](./PassportApplicationContract/PassportApplication.cs)
-
-[PassportApplicationTests.cs](./PassportApplicationContract.Tests/PassportApplicationTests.cs)
+1. Smart Contract: [PassportApplication.cs](./PassportApplicationContract/PassportApplication.cs)
+2. Smart Contract Test Case: [PassportApplicationTests.cs](./PassportApplicationContract.Tests/PassportApplicationTests.cs)
