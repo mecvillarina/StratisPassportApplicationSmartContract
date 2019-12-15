@@ -199,8 +199,10 @@ namespace PassportApplicationContract.Tests
 
             var contract = new PassportApplication(this.mockContractState.Object, AppId, ProviderAddress, RefNumber);
 
-            // Setup Persistance States
+            // Setup set state.
             this.mockPersistentState.Setup(s => s.GetUInt32(nameof(PassportApplication.State))).Returns((uint)PassportApplication.StateType.PersonalAppearance);
+
+            // Setup set balance.
             this.mockPersistentState.Setup(s => s.GetUInt64(nameof(PassportApplication.Balance))).Returns(8000000000);
 
             contract.CancelApplication();
@@ -313,7 +315,6 @@ namespace PassportApplicationContract.Tests
             this.mockPersistentState.Setup(s => s.GetUInt32(nameof(PassportApplication.State))).Returns((uint)PassportApplication.StateType.PersonalAppearance);
 
             // Attempt RejectApplication when sender is the provider and the state is PersonalAppearance should succeed.
-
             contract.RejectApplication();
 
             this.mockPersistentState.Verify(s => s.SetUInt32(nameof(PassportApplication.State), (uint)PassportApplication.StateType.RejectedApplication));
