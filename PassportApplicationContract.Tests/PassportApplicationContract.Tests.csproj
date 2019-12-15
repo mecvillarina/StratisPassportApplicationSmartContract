@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\PassportRenewalContract\PassportApplicationContract.csproj" />
+    <ProjectReference Include="..\PassportApplicationContract\PassportApplicationContract.csproj" />
   </ItemGroup>
 
 </Project>
